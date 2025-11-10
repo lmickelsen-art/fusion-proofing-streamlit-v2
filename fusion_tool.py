@@ -9,14 +9,12 @@ st.title("Fusion Proofing Assignment Tool")
 sheet_url = "https://docs.google.com/spreadsheets/d/1n1LFx5NLqVKNjpJysrai_M3PX-KuinHZUaZEMX7sBac/export?format=xlsx"
 
 try:
-    # Read all sheets from the Google Sheet
     all_sheets = pd.read_excel(sheet_url, sheet_name=None)
-    data = all_sheets[list(all_sheets.keys())[0]]  # first sheet for assignment rules
-    deliverables_df = all_sheets.get("Sheet3")  # third sheet for deliverables
+    data = all_sheets[list(all_sheets.keys())[0]]
+    deliverables_df = all_sheets.get("Sheet3")
 
     st.success("Fusion rule data loaded from shared source.")
 
-    # Clean column names
     data.columns = data.columns.str.strip().str.lower().str.replace(" ", "_")
 
     def extract_unique_values(column):
@@ -47,14 +45,14 @@ try:
         st.text_input("Completion date reason")
 
         st.subheader("Deliverable Types (based on Asset Type selection)")
+        selected_deliverables = []
         if deliverables_df is not None:
             deliverables_df.columns = deliverables_df.columns.str.strip().str.lower().str.replace(" ", "_")
             deliverables_df['asset_type'] = deliverables_df['asset_type'].fillna(method='ffill')
             matching_rows = deliverables_df[deliverables_df['asset_type'].str.lower() == asset_type.lower()] if asset_type else pd.DataFrame()
             deliverables = matching_rows['deliverable_type'].dropna().tolist()
             if deliverables:
-                for d in deliverables:
-                    st.markdown(f"- {d}")
+                selected_deliverables = st.multiselect("Select Deliverable Types", options=deliverables)
             else:
                 st.write("No deliverables defined for this asset type.")
         else:
