@@ -9,7 +9,11 @@ st.title("Fusion Proofing Assignment Tool")
 sheet_url = "https://docs.google.com/spreadsheets/d/1n1LFx5NLqVKNjpJysrai_M3PX-KuinHZUaZEMX7sBac/export?format=xlsx"
 
 try:
-    data = pd.read_excel(sheet_url)
+    # Read all sheets from the Google Sheet
+    all_sheets = pd.read_excel(sheet_url, sheet_name=None)
+    data = all_sheets[list(all_sheets.keys())[0]]  # first sheet for assignment rules
+    deliverables_df = all_sheets.get("Sheet3")  # third sheet for deliverables
+
     st.success("Fusion rule data loaded from shared source.")
 
     # Clean column names
@@ -29,18 +33,17 @@ try:
         asset_type = st.selectbox("Asset Type", options=[""] + extract_unique_values('project_type'))
         categories = st.multiselect("Brand Names in Scope", options=extract_unique_values('category'))
 
-        # Deliverable Type view (not used for logic)
         st.markdown("**Deliverable Types (based on Asset Type selection)**")
-        if asset_type:
-            deliverables = {
-                "Website/Digital": ["Landing Page", "Banner", "Web Copy"],
-                "Print": ["Brochure", "Flyer", "Label"],
-                "Sales": ["Deck", "One-pager", "Email"],
-                "Events": ["Booth Graphics", "Handouts"],
-            }
-            st.write(deliverables.get(asset_type, ["No deliverables defined for this asset type."]))
+        if deliverables_df is not None:
+            deliverables_df.columns = deliverables_df.columns.str.strip().str.lower().str.replace(" ", "_")
+            matching_rows = deliverables_df[deliverables_df['asset_type'].str.lower() == asset_type.lower()] if asset_type else pd.DataFrame()
+            deliverables = matching_rows['deliverable_type'].dropna().tolist()
+            if deliverables:
+                st.write(deliverables)
+            else:
+                st.write("No deliverables defined for this asset type.")
         else:
-            st.info("Select an Asset Type to see deliverable types.")
+            st.info("Deliverables sheet not found.")
 
         selected_user = st.selectbox("Or, select a specific user to view their criteria:", [""] + sorted(data['name'].dropna().unique().tolist()))
 
@@ -65,7 +68,6 @@ try:
 
     filtered = data[data.apply(matches, axis=1)]
 
-    # Sort by team priority
     team_order = ['WIP', 'Content', 'Messaging', 'Management', 'Executive', 'Production']
 
     def extract_sort_key(team_val):
