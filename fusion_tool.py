@@ -6,7 +6,7 @@ st.set_page_config(page_title="Fusion Proofing Assignment Tool", layout="wide")
 st.title("Fusion Proofing Assignment Tool")
 
 # Load shared Google Sheet as data source
-sheet_url = "https://docs.google.com/spreadsheets/d/1n1LFx5NLqVKNjpJysrai_M3PX-KuinHZUaZEMX7sBac/edit?usp=sharing"
+sheet_url = "https://docs.google.com/spreadsheets/d/1n1LFx5NLqVKNjpJysrai_M3PX-KuinHZUaZEMX7sBac/export?format=xlsx"
 
 try:
     data = pd.read_excel(sheet_url)
