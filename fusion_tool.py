@@ -36,11 +36,12 @@ try:
         st.markdown("**Deliverable Types (based on Asset Type selection)**")
         if deliverables_df is not None:
             deliverables_df.columns = deliverables_df.columns.str.strip().str.lower().str.replace(" ", "_")
-            deliverables_df['asset_type'] = deliverables_df['asset_type'].fillna(method='ffill')  # forward-fill asset type
+            deliverables_df['asset_type'] = deliverables_df['asset_type'].fillna(method='ffill')
             matching_rows = deliverables_df[deliverables_df['asset_type'].str.lower() == asset_type.lower()] if asset_type else pd.DataFrame()
             deliverables = matching_rows['deliverable_type'].dropna().tolist()
             if deliverables:
-                st.write(deliverables)
+                for d in deliverables:
+                    st.markdown(f"- {d}")
             else:
                 st.write("No deliverables defined for this asset type.")
         else:
@@ -52,9 +53,9 @@ try:
     def matches(row):
         def field_blocks(row_val, selected_vals):
             if pd.isna(row_val) or str(row_val).strip() == '':
-                return False  # blank = wildcard
+                return False
             if not selected_vals:
-                return True  # rule is specific, but user didn't select
+                return True
             rule_values = set(x.strip().lower() for x in str(row_val).split(',') if x.strip())
             selected_values = set(x.lower() for x in selected_vals)
             return not rule_values.intersection(selected_values)
