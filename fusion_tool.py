@@ -25,9 +25,23 @@ try:
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        countries = st.multiselect("Select Country Stakeholder(s):", options=extract_unique_values('country'))
-        project_types = st.multiselect("Select Project Type(s):", options=extract_unique_values('project_type'))
-        categories = st.multiselect("Select Category(s):", options=extract_unique_values('category'))
+        countries = st.multiselect("Countries who will use this asset?", options=extract_unique_values('country'))
+        asset_type = st.selectbox("Asset Type", options=[""] + extract_unique_values('project_type'))
+        categories = st.multiselect("Brand Names in Scope", options=extract_unique_values('category'))
+
+        # Deliverable Type view (not used for logic)
+        st.markdown("**Deliverable Types (based on Asset Type selection)**")
+        if asset_type:
+            deliverables = {
+                "Website/Digital": ["Landing Page", "Banner", "Web Copy"],
+                "Print": ["Brochure", "Flyer", "Label"],
+                "Sales": ["Deck", "One-pager", "Email"],
+                "Events": ["Booth Graphics", "Handouts"],
+            }
+            st.write(deliverables.get(asset_type, ["No deliverables defined for this asset type."]))
+        else:
+            st.info("Select an Asset Type to see deliverable types.")
+
         selected_user = st.selectbox("Or, select a specific user to view their criteria:", [""] + sorted(data['name'].dropna().unique().tolist()))
 
     # Match rules: all non-blank fields in rule must match user input
@@ -45,7 +59,7 @@ try:
             return False
         if field_blocks(row.get('category', ''), categories):
             return False
-        if field_blocks(row.get('project_type', ''), project_types):
+        if asset_type and field_blocks(row.get('project_type', ''), [asset_type]):
             return False
         return True
 
@@ -81,9 +95,9 @@ try:
             user_row = data[data['name'].str.lower() == selected_user.lower()]
             if not user_row.empty:
                 user_info = user_row.iloc[0]
-                st.markdown(f"**Country Stakeholder(s):** {user_info.get('country', '—')}")
-                st.markdown(f"**Category(s):** {user_info.get('category', '—')}")
-                st.markdown(f"**Project Type(s):** {user_info.get('project_type', '—')}")
+                st.markdown(f"**Countries who will use this asset?:** {user_info.get('country', '—')}")
+                st.markdown(f"**Brand Names in Scope:** {user_info.get('category', '—')}")
+                st.markdown(f"**Asset Type:** {user_info.get('project_type', '—')}")
                 st.markdown(f"**Team:** {user_info.get('team', '—')}")
             else:
                 st.warning("User not found.")
