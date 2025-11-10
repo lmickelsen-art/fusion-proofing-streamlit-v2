@@ -29,11 +29,24 @@ try:
     col1, col2 = st.columns([1, 2])
 
     with col1:
+        st.subheader("Request Details")
+        st.text_input("Subject")
+        st.text_input("Customer Contact")
+        st.text_area("Briefly Describe your Request", height=150)
+        st.text_area("Please include relevant sources", height=100)
+        st.selectbox("Related to another project?", ["Yes", "No"])
+
+        st.subheader("Asset Info")
         countries = st.multiselect("Countries who will use this asset?", options=extract_unique_values('country'))
         asset_type = st.selectbox("Asset Type", options=[""] + extract_unique_values('project_type'))
         categories = st.multiselect("Brand Names in Scope", options=extract_unique_values('category'))
 
-        st.markdown("**Deliverable Types (based on Asset Type selection)**")
+        st.selectbox("Department", ["Marketing", "Creative", "Regulatory", "Sales", "Operations", "Other"])
+        st.selectbox("Priority Rating", ["High", "Medium", "Low"])
+        st.date_input("Proof must be completed by")
+        st.text_input("Completion date reason")
+
+        st.subheader("Deliverable Types (based on Asset Type selection)")
         if deliverables_df is not None:
             deliverables_df.columns = deliverables_df.columns.str.strip().str.lower().str.replace(" ", "_")
             deliverables_df['asset_type'] = deliverables_df['asset_type'].fillna(method='ffill')
@@ -47,9 +60,9 @@ try:
         else:
             st.info("Deliverables sheet not found.")
 
-        selected_user = st.selectbox("Or, select a specific user to view their criteria:", [""] + sorted(data['name'].dropna().unique().tolist()))
+        st.subheader("User Assignment Review")
+        selected_user = st.selectbox("Select a specific user to view their criteria:", [""] + sorted(data['name'].dropna().unique().tolist()))
 
-    # Match rules: all non-blank fields in rule must match user input
     def matches(row):
         def field_blocks(row_val, selected_vals):
             if pd.isna(row_val) or str(row_val).strip() == '':
