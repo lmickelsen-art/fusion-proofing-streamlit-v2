@@ -36,6 +36,7 @@ try:
         st.markdown("**Deliverable Types (based on Asset Type selection)**")
         if deliverables_df is not None:
             deliverables_df.columns = deliverables_df.columns.str.strip().str.lower().str.replace(" ", "_")
+            deliverables_df['asset_type'] = deliverables_df['asset_type'].fillna(method='ffill')  # forward-fill asset type
             matching_rows = deliverables_df[deliverables_df['asset_type'].str.lower() == asset_type.lower()] if asset_type else pd.DataFrame()
             deliverables = matching_rows['deliverable_type'].dropna().tolist()
             if deliverables:
